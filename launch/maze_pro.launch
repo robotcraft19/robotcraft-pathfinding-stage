@@ -1,0 +1,18 @@
+<!-- maze.launch: launch stage with a maze_solver node -->
+
+<launch>
+  <!-- Run stage node -->
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find amazebot-pathfinding-stage)/world/robotcraft_maze.world" />
+  <!-- Run map server node -->
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find amazebot-pathfinding-stage)/scans/map.yaml"/>
+  <!-- Run maze_pro node -->
+  <node pkg="amazebot-pathfinding-stage" type="astar_solver.py" name="maze_pro" output="screen">
+      <rosparam param="position">
+          startX: 0.05
+          startY: -0.40
+          targetX: 1.20
+          targetY: -5.20
+      </rosparam>
+  </node>
+
+</launch>
