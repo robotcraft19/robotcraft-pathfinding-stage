@@ -8,7 +8,8 @@
 <br />
 <p align="center">
   <a href="https://github.com/robotcraft19/amazebot-pathfinding-stage>
-    <img src="https://github.com/robotcraft19/amazebot-pathfinding-stage/blob/master/res/images/logo_amazebot.png?raw=true" alt="Logo" width="100" height="100">
+    <img src="res/images/logo_amazebot.png" alt="Logo" width="100" height="100">
+    <img src="https://raw.githubusercontent.com/robotcraft19/amazebot-pathfinding-stage/master/res/images/logo_amazebot.png">                                                                           
   </a>
 
   <h3 align="center">Amazebot Pathfinding Simulation Package</h3>
