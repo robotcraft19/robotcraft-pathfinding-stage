@@ -2,7 +2,7 @@
 
 <launch>
   <!-- Run stage node -->
-  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find amazebot-pathfinding-stage)/world/robotcraft_maze.world" />
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robotcraft-pathfinding-stage)/world/robotcraft_maze.world" />
 
     <!-- Run gmapping node -->
 	  <node pkg="gmapping" type="slam_gmapping" name="gmapping">
@@ -20,11 +20,11 @@
     </node>
 
     <!-- Run maze_basic node -->
-    <node pkg="amazebot-pathfinding-stage" type="maze_basic_stage" name="maze_basic_stage" output="screen" />
+    <node pkg="robotcraft-pathfinding-stage" type="maze_basic_stage" name="maze_basic_stage" output="screen" />
     <param name="left" type="bool" value="true" />
     <param name="right" type="bool" value="true" />
 
   <!-- Run map saver node, periodically saves map and robot position backups -->
-  <node pkg="amazebot-pathfinding-stage" type="map_saver_stage" name="map_saver_controller_node_stage" output="screen"/>
+  <node pkg="robotcraft-pathfinding-stage" type="map_saver_stage" name="map_saver_controller_node_stage" output="screen"/>
 
 </launch>
