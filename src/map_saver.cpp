@@ -57,11 +57,10 @@ private:
 public:
 
     MapSaver(){
-        // Initialize ROS
-        this->n = ros::NodeHandle();
-
-				// Add odom subscriber
-				this->odom_sub = this->n.subscribe("odom", 5, &MapSaver::odomCallback, this);
+    	// Initialize ROS
+    	this->n = ros::NodeHandle();	
+		// Add odom subscriber
+		this->odom_sub = this->n.subscribe("odom", 5, &MapSaver::odomCallback, this);
 
     }
 
@@ -70,20 +69,18 @@ public:
         ros::Rate loop_rate(10);
         while (ros::ok())
         {
-        		// Increase loop counter
-        		loop_counter++;
-
-	        	// Save map every 100 loops
-	        	if(loop_counter % 100 == 0) {
+        	// Increase loop counter
+        	loop_counter++;
+	        // Save map every 100 loops
+	        if(loop_counter % 100 == 0) {
 	        	saveMap();
-						saveRobotPose();
-						ROS_WARN_STREAM("Saving image of map as map_backup.pgm"
-						<< " and saving robot's pose as rob_pos_backup.txt"
-					 	<< " in ~/catkin_ws/src/robotcraft-pathfinding-stage/scans");
-	        	}
-
-						// Receive messages
-						ros::spinOnce();
+				saveRobotPose();
+				ROS_WARN_STREAM("Saving image of map as map_backup.pgm"
+					<< " and saving robot's pose as rob_pos_backup.txt"
+				 	<< " in ~/catkin_ws/src/robotcraft-pathfinding-stage/scans");
+	        }
+			// Receive messages
+			ros::spinOnce();
 
             // And throttle the loop
             loop_rate.sleep();

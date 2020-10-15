@@ -19,6 +19,9 @@
        <param name="maxRange" value="3.0"/> -->
     </node>
 
+    <!-- Run capture key node -->
+    <node pkg="robotcraft-pathfinding-stage" type="capture_key" name="capture_key" output="screen" />
+
     <!-- Run maze_basic node -->
     <node pkg="robotcraft-pathfinding-stage" type="maze_basic_stage" name="maze_basic_stage" output="screen" />
     <param name="left" type="bool" value="true" />
