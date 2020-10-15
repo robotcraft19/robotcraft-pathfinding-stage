@@ -7,12 +7,6 @@
   <node pkg="map_server" type="map_server" name="map_server" args="$(find robotcraft-pathfinding-stage)/scans/map.yaml"/>
   <!-- Run maze_pro node -->
   <node pkg="robotcraft-pathfinding-stage" type="astar_solver.py" name="maze_pro" output="screen">
-      <rosparam param="position">
-          startX: 0.05
-          startY: -0.40
-          targetX: 1.20
-          targetY: -5.20
-      </rosparam>
   </node>
 
 </launch>

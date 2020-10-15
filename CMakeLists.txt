@@ -15,11 +15,11 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package()
 
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(maze_basic_stage src/wall_follower.cpp)
+add_executable(maze_basic_stage src/local_planner.cpp)
 target_link_libraries(maze_basic_stage ${catkin_LIBRARIES})
 
 #add_executable(maze_pro_stage src/astar_solver.cpp) # or .py?
@@ -27,3 +27,6 @@ target_link_libraries(maze_basic_stage ${catkin_LIBRARIES})
 
 add_executable(map_saver_stage src/map_saver.cpp)
 target_link_libraries(map_saver_stage ${catkin_LIBRARIES})
+
+add_executable(capture_key src/capture_key.cpp)
+target_link_libraries(capture_key ${catkin_LIBRARIES})

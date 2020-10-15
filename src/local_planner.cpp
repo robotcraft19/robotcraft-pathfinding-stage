@@ -9,71 +9,16 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include "ros/ros.h"
-#include <ros/console.h>
-#include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h"
-#include "nav_msgs/Odometry.h"
-#include "std_srvs/Empty.h"
-#include <ctime>
-
-#define TARGET_DISTANCE 0.20
-
-class BasicSolver {
-
-private:
-
-    // Node handle
-    ros::NodeHandle n;
-
-    // Publishers
-    ros::Publisher cmd_vel_pub;
-
-    // Subscribers
-    ros::Subscriber front_ir_sub;
-    ros::Subscriber left_ir_sub;
-    ros::Subscriber right_ir_sub;
-    ros::Subscriber odom_sub;
-
-    // Services
-    ros::ServiceServer  basic_serv;
-
-    // External Parameters
-    bool left;
-    bool right;
-
-    // Global variables
-    float front_distance;
-    float left_distance;
-    float right_distance;
-
-    // PID control
-    float old_prop_error;
-    float integral_error;
-
-    float KP = 10;
-    float KI = 0.0;
-    float KD = 0.0;
-    float time_interval = 0.1;
-
-    // Helper variables
-    bool robot_lost;
-    int lost_counter;
-    bool robot_stop;
-    float robot_x, robot_y;
+#include "local_planner.h"
 
 
-
-    geometry_msgs::Twist calculateCommand(){
+geometry_msgs::Twist LocalPlanner::calculateCommand(){
     	// Create message
     	auto msg = geometry_msgs::Twist();
 
-      if(!robot_stop) {
+      if(!this->robot_stop) {
         // Check if robot is lost (after 75 loops without sensing any wall)
-        calculateRobotLost();
+        this->calculateRobotLost();
 
           if (right)
           {
@@ -131,21 +76,32 @@ private:
     }
 
 
-    void frontIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
+    void LocalPlanner::frontIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
     	// Extract range, first (and only) element of array
         this->front_distance = msg->ranges[0];
     }
-    void leftIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
+    void LocalPlanner::leftIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
         // Extract range, first (and only) element of array
     	this->left_distance = msg->ranges[0];
     }
-    void rightIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
+    void LocalPlanner::rightIRCallback(const sensor_msgs::LaserScan::ConstPtr& msg){
         // Extract range, first (and only) element of array
     	this->right_distance = msg->ranges[0];
     }
 
+    void LocalPlanner::keyCallback( std_msgs::Int16 key_msg ) {
+        ROS_INFO("key typed: %d", key_msg.data);
+        if( key_msg.data == 115 ){ 
+            ROS_INFO("Saving map, stopping robot");
+            this->robot_stop = true;
+            this->saveMap();
+            this->saveRobotPose();
+            ros::shutdown();
+        }
+    }
 
-    float calculateGain(float value)
+
+    float LocalPlanner::calculateGain(float value)
 	{
         // Calculate errors
 	    float error = TARGET_DISTANCE - value;
@@ -174,7 +130,7 @@ private:
 	    return gain;
 	}
 
-	void calculateRobotLost()
+	void LocalPlanner::calculateRobotLost()
 	{
         if (right)
         {
@@ -219,17 +175,7 @@ private:
         }
 	}
 
-  bool basicServiceCallback(std_srvs::Empty::Request  &req,
-           std_srvs::Empty::Response &res)
-  {
-    ROS_INFO("Request to stop robot and save map and position received...");
-    robot_stop = !robot_stop;
-    saveMap();
-    saveRobotPose();
-    return true;
-  }
-
-  void saveMap() {
+  void LocalPlanner::saveMap() {
     /* Runs map_saver node in map_server package to save
     *  occupancy grid from /map topic as image */
 
@@ -237,7 +183,7 @@ private:
     system("cd ~/catkin_ws/src/robotcraft-pathfinding-stage/scans && rosrun map_server map_saver -f map");
   }
 
-  void saveRobotPose() {
+  void LocalPlanner::saveRobotPose() {
     /* Saves the robot's latest pose which can be used
     *  for target position calculation */
     const char* homeDir = getenv("HOME");
@@ -251,19 +197,17 @@ private:
 
   }
 
-  void odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
+  void LocalPlanner::odomCallback(const nav_msgs::Odometry::ConstPtr &msg)
 	{
     this->robot_x = msg->pose.pose.position.x;
     this->robot_y = msg->pose.pose.position.y;
 	}
 
 
-public:
-
-    BasicSolver(){
+LocalPlanner::BasicSolver(){
         // Initialize ROS
         this->n = ros::NodeHandle();
-	srand(time(NULL));
+	    srand(time(NULL));
 
         n.getParam("left", this->left);
         n.getParam("right", this->right);
@@ -297,13 +241,10 @@ public:
         this->left_ir_sub = this->n.subscribe("base_scan_2", 10, &BasicSolver::leftIRCallback, this);
         this->right_ir_sub = this->n.subscribe("base_scan_3", 10, &BasicSolver::rightIRCallback, this);
         this->odom_sub = this->n.subscribe("odom", 5, &BasicSolver::odomCallback, this);
+        this->key_sub = this->n.subscribe("/key_typed", 1, &BasicSolver::keyCallback, this);
+}
 
-        // Setup services
-        this->basic_serv = n.advertiseService("stop_save", &BasicSolver::basicServiceCallback, this);
-
-    }
-
-    void run(){
+void LocalPlanner::run(){
         // Send messages in a loop
         ros::Rate loop_rate(10);
         while (ros::ok())
@@ -322,7 +263,6 @@ public:
         }
     }
 };
-
 
 int main(int argc, char **argv){
     // Initialize ROS
