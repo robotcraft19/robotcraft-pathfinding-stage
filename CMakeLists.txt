@@ -19,14 +19,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(maze_basic_stage src/local_planner.cpp)
-target_link_libraries(maze_basic_stage ${catkin_LIBRARIES})
+add_executable(local_planner src/local_planner.cpp)
+target_link_libraries(local_planner ${catkin_LIBRARIES})
 
 #add_executable(maze_pro_stage src/astar_solver.cpp) # or .py?
 #target_link_libraries(maze_pro_stage ${catkin_LIBRARIES})
 
-add_executable(map_saver_stage src/map_saver.cpp)
-target_link_libraries(map_saver_stage ${catkin_LIBRARIES})
+add_executable(map_saver src/map_saver.cpp)
+target_link_libraries(map_saver ${catkin_LIBRARIES})
 
 add_executable(capture_key src/capture_key.cpp)
 target_link_libraries(capture_key ${catkin_LIBRARIES})
