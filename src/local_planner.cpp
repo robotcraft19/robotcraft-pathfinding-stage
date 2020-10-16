@@ -261,8 +261,7 @@ void LocalPlanner::run(){
             // And throttle the loop
             loop_rate.sleep();
         }
-    }
-};
+}
 
 int main(int argc, char **argv){
     // Initialize ROS

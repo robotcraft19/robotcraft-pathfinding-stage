@@ -6,7 +6,7 @@
   <!-- Run map server node -->
   <node pkg="map_server" type="map_server" name="map_server" args="$(find robotcraft-pathfinding-stage)/scans/map.yaml"/>
   <!-- Run maze_pro node -->
-  <node pkg="robotcraft-pathfinding-stage" type="astar_solver.py" name="maze_pro" output="screen">
+  <node pkg="robotcraft-pathfinding-stage" type="global_planner.py" name="global_planner" output="screen">
   </node>
 
 </launch>
