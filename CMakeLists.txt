@@ -19,8 +19,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(local_planner src/local_planner.cpp)
-target_link_libraries(local_planner ${catkin_LIBRARIES})
+add_executable(wall_follower src/wall_follower.cpp)
+target_link_libraries(wall_follower ${catkin_LIBRARIES})
 
 #add_executable(maze_pro_stage src/astar_solver.cpp) # or .py?
 #target_link_libraries(maze_pro_stage ${catkin_LIBRARIES})
