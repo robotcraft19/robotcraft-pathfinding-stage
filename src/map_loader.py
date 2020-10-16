@@ -15,8 +15,7 @@ class MapLoader:
         self.target = target
 
         # assert that both values are either provided or not provided
-        assert (self.start and self.target) \
-            or (not self.start and not self.target)
+        assert (self.start and self.target) or (not self.start and not self.target)
 
         # if parameters are provided, matrix needs to be cropped to find origin
         if self.start:
@@ -26,9 +25,9 @@ class MapLoader:
 
     def request_occupancy_grid(self):
         # Make request to map_loader service
-        rospy.wait_for_service('static_map')
+        rospy.wait_for_service("static_map")
         try:
-            get_map_service = rospy.ServiceProxy('static_map', GetMap)
+            get_map_service = rospy.ServiceProxy("static_map", GetMap)
             req = GetMapRequest()
             resp = get_map_service(req)
             rospy.loginfo("Successfully loaded occupancy grid from map_server")
@@ -39,10 +38,12 @@ class MapLoader:
     def loadMap(self):
 
         # Load image (alternatively use occupancy_grid data and reshape)
-        scans_dir = os.path.join(os.path.expanduser(
-            "~"), "catkin_ws/src/robotcraft-pathfinding-stage/scans/")
-        self.orig_img = cv2.imread(os.path.join(
-            scans_dir, "map.pgm"), cv2.IMREAD_GRAYSCALE)
+        scans_dir = os.path.join(
+            os.path.expanduser("~"), "catkin_ws/src/robotcraft-pathfinding-stage/scans/"
+        )
+        self.orig_img = cv2.imread(
+            os.path.join(scans_dir, "map.pgm"), cv2.IMREAD_GRAYSCALE
+        )
 
         if self.crop_image == True:
             img = self.autocrop(self.orig_img)
@@ -59,13 +60,20 @@ class MapLoader:
         img = np.logical_not(img).astype(int)
 
         # Save filtered image to scans folder
-        cv2.imwrite(os.path.join(scans_dir, "map_filtered.pgm"), img*255)
+        cv2.imwrite(os.path.join(scans_dir, "map_filtered.pgm"), img * 255)
 
         img = self.place_robot(img)
         img = self.place_target(img)
-        np.savetxt(os.path.join(os.path.expanduser("~"),
-                                'catkin_ws/src/robotcraft-pathfinding-stage/scans/map_matrix.txt'), img, delimiter='', fmt='%d')
-        rospy.loginfo('Saved map matrix to text file...')
+        np.savetxt(
+            os.path.join(
+                os.path.expanduser("~"),
+                "catkin_ws/src/robotcraft-pathfinding-stage/scans/map_matrix.txt",
+            ),
+            img,
+            delimiter="",
+            fmt="%d",
+        )
+        rospy.loginfo("Saved map matrix to text file...")
 
         return img
 
@@ -79,20 +87,20 @@ class MapLoader:
         if not self.start:
             # Place robot at origin of map
             if self.crop_image == True:
-                n_rows_removed_top = self.cropped_rows[0][1] - \
-                    self.cropped_rows[0][0]
-                n_cols_removed_left = self.cropped_cols[0][1] - \
-                    self.cropped_cols[0][0]
+                n_rows_removed_top = self.cropped_rows[0][1] - self.cropped_rows[0][0]
+                n_cols_removed_left = self.cropped_cols[0][1] - self.cropped_cols[0][0]
 
                 # flipped coordinate system on y-axis
-                row = (self.orig_img.shape[1]-1) - int(
-                    round((abs(origin_y) / resolution))) - n_rows_removed_top
-                column = int(round((abs(origin_x) / resolution))
-                             ) - n_cols_removed_left
+                row = (
+                    (self.orig_img.shape[1] - 1)
+                    - int(round((abs(origin_y) / resolution)))
+                    - n_rows_removed_top
+                )
+                column = int(round((abs(origin_x) / resolution))) - n_cols_removed_left
             else:
                 # Calculate row and column of cell
                 # flipped coordinate system on y-axis
-                row = (height-1) - int(round((abs(origin_y) / resolution)))
+                row = (height - 1) - int(round((abs(origin_y) / resolution)))
                 column = int(round((abs(origin_x) / resolution)))
         else:
             print("Placed robot from launch file")
@@ -110,8 +118,13 @@ class MapLoader:
             x_pos = 0
             y_pos = 0
 
-            with open(os.path.join(os.path.expanduser("~"),
-                                   'catkin_ws/src/robotcraft-pathfinding-stage/scans/robot_position.txt'), 'r') as f:
+            with open(
+                os.path.join(
+                    os.path.expanduser("~"),
+                    "catkin_ws/src/robotcraft-pathfinding-stage/scans/robot_position.txt",
+                ),
+                "r",
+            ) as f:
                 x_pos = float(f.readline())
                 y_pos = float(f.readline())
 
@@ -127,8 +140,8 @@ class MapLoader:
             target_col = int(round(self.target[0] / resolution))
 
         # Extend matrix in case target cell is outside of maze
-        if target_row > (img.shape[0]-1):
-            diff = target_row - (img.shape[0]-1)
+        if target_row > (img.shape[0] - 1):
+            diff = target_row - (img.shape[0] - 1)
             zeros = np.zeros(shape=(diff, img.shape[1]))
             img = np.r_[img, zeros]
         if target_row < 0:
@@ -136,8 +149,8 @@ class MapLoader:
             zeros = np.zeros(shape=(diff, img.shape[1]))
             img = np.r_[zeros, img]
             target_row = 0
-        if target_col > (img.shape[1]-1):
-            diff = target_col - (img.shape[1]-1)
+        if target_col > (img.shape[1] - 1):
+            diff = target_col - (img.shape[1] - 1)
             zeros = np.zeros(shape=(img.shape[0], diff))
             img = np.c_[img, zeros]
         if target_col < 0:
@@ -165,14 +178,18 @@ class MapLoader:
             flatImage = image
         assert len(flatImage.shape) == 2
 
-        rows = np.where((np.min(flatImage, 0) < lower_threshold)
-                        | (np.max(flatImage, 0) > upper_threshold))[0]
+        rows = np.where(
+            (np.min(flatImage, 0) < lower_threshold)
+            | (np.max(flatImage, 0) > upper_threshold)
+        )[0]
         if rows.size:
-            cols = np.where((np.max(flatImage, 1) > upper_threshold) | (
-                np.min(flatImage, 1) < lower_threshold))[0]
+            cols = np.where(
+                (np.max(flatImage, 1) > upper_threshold)
+                | (np.min(flatImage, 1) < lower_threshold)
+            )[0]
             self.cropped_rows = [(0, cols[0]), (cols[-1], image.shape[1])]
             self.cropped_cols = [(0, rows[0]), (rows[-1], image.shape[0])]
-            image = image[cols[0]: cols[-1] + 1, rows[0]: rows[-1] + 1]
+            image = image[cols[0] : cols[-1] + 1, rows[0] : rows[-1] + 1]
         else:
             image = image[:1, :1]
 

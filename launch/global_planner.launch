@@ -9,4 +9,6 @@
   <node pkg="robotcraft-pathfinding-stage" type="global_planner.py" name="global_planner" output="screen">
   </node>
 
+  <node pkg="robotcraft-pathfinding-stage" type="pid_tuner.py" name="pid_tuner_viz" output="screen" />
+
 </launch>
