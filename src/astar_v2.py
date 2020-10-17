@@ -59,7 +59,6 @@ class Node:
                     try:
                         nb_nb = Node.matrix[self.pos_x + dir[0] + dir_dir[0]][
                             self.pos_y + dir[1] + dir_dir[1]
-
                         ]
                         if nb_nb == 1:
                             wall_penalty += 5.0
@@ -71,7 +70,7 @@ class Node:
                 pass
 
         return wall_penalty
-      
+
     def calculate_heuristic(self):
         """
         Heuristic for the A*
@@ -216,4 +215,5 @@ class AStar:
                 for col in row:
                     f.write(str(int(col)))
                 f.write("\n")
-                
+
+
