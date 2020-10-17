@@ -3,6 +3,7 @@ import rospy
 import time
 from map_loader import MapLoader
 from astar import PathFinder
+from astar_v2 import AStar
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -20,8 +21,8 @@ class Cell:
     def __init__(self, row, column):
         self.row = row
         self.column = column
-        self.rel_row = self.row - Cell.start.row
-        self.rel_column = self.column - Cell.start.column
+        self.rel_row = self.row - Cell.start.pos_x
+        self.rel_column = self.column - Cell.start.pos_y
 
     def pose(self):
         # Check if cell has any walls as neighbours
@@ -84,8 +85,10 @@ class GlobalPlanner:
         self.precision = precision
 
         # Calculate path
-        self.path_finder = PathFinder(self.map_matrix)
-        raw_path = self.path_finder.calculate_path()
+        t = time.time()
+        self.path_finder = AStar(self.map_matrix)
+        raw_path = self.path_finder.search()
+        print(time.time() - t)
         Cell.start = self.path_finder.start
         self.path = [Cell(r, c) for r, c in raw_path]
         self.goal = self.path[0].pose()
@@ -94,10 +97,10 @@ class GlobalPlanner:
 
         # Setup publishers
         self.cmd_vel_pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
-        self.pid_pub = rospy.Publisher("/pid_err", Float64, queue_size=10)
+        # self.pid_pub = rospy.Publisher("/pid_err", Float64, queue_size=10)
 
         # Setup subscribers
-        odom_sub = rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        _ = rospy.Subscriber("/odom", Odometry, self.odom_callback)
         # odom_sub = rospy.Subscriber("/amcl_pose", PoseWithCovarianceStamped, self.odom_callback)
 
     def odom_callback(self, msg):
@@ -121,17 +124,17 @@ class GlobalPlanner:
         rate = rospy.Rate(10)  # 10hz
         speed = Twist()
         goto = GotoController()
-        goto.set_max_linear_acceleration(.5)
+        goto.set_max_linear_acceleration(.05)
         goto.set_max_angular_acceleration(.2)
         goto.set_forward_movement_only(True)
         while not rospy.is_shutdown():
 
             speed_pose = goto.get_velocity(self.pose, self.goal, 0)
-            self.pid_pub.publish(goto.d)
+            # self.pid_pub.publish(goto.desiredAngVel)
             speed.linear.x = speed_pose.xVel
             speed.angular.z = speed_pose.thetaVel
             self.cmd_vel_pub.publish(speed)
-            if speed_pose.xVel < .1 and speed_pose.thetaVel < .1:
+            if goto.get_goal_distance(self.pose, self.goal) <= .05: # 5 cm precision
                 self.next_pose()
             rate.sleep()
 

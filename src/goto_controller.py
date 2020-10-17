@@ -33,16 +33,17 @@ class GotoController:
         self.kP = 3
         self.kA = 8
         self.kB = -1.5
-        self.max_linear_speed = .8
+        self.max_linear_speed = .1
         self.min_linear_speed = 0
-        self.max_angular_speed = .4
+        self.max_angular_speed = 1
         self.min_angular_speed = 0
-        self.max_linear_acceleration = 1e9
-        self.max_angular_acceleration = 1e9
-        self.linear_tolerance = 0.025  # 2.5cm
+        self.max_linear_acceleration = .08
+        self.max_angular_acceleration = .4
+        self.linear_tolerance = 0.01  # 2.5cm
         self.angular_tolerance = 3 / 180 * pi  # 3 degrees
         self.forward_movement_only = False
-        self.d = 0.0
+        self.desiredLinVel = 0.0
+        self.desiredAngVel = 0.0
 
     def set_constants(self, kP, kA, kB):
         self.kP = kP
@@ -106,7 +107,6 @@ class GotoController:
         #               a, b)
 
         d = self.get_goal_distance(cur, goal)
-        self.d = d
         if self.forward_movement_only:
             direction = 1
             a = self.normalize_pi(a)
@@ -124,6 +124,9 @@ class GotoController:
         else:
             desired.xVel = self.kP * d * direction
             desired.thetaVel = self.kA * a + self.kB * b
+
+        self.desiredLinVel = desired.xVel
+        self.desiredAngVel = desired.thetaVel
 
         # Adjust velocities if X velocity is too high.
         if abs(desired.xVel) > self.max_linear_speed:
