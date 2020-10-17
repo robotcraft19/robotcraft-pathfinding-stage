@@ -3,7 +3,7 @@ import rospy
 import time
 from map_loader import MapLoader
 from astar import PathFinder
-from astar_v2 import AStar
+from astar import AStar
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from geometry_msgs.msg import PoseWithCovarianceStamped
